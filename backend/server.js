@@ -1,36 +1,36 @@
 import express from "express";
 import dotenv from "dotenv";
+/* connect db */
 import connectDb from "./Config/connectDb.js";
-import User from "./Models/userModel.js";
-import Friend from "./Models/friendsModel.js";
-import Post from "./Models/postModel.js";
+/* auth routes */
+import authRoutes from "./Routes/authRoutes/auth.js";
+import userRoutes from "./Routes/userRoutes/user.js";
+/* error middlewares  */
+import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+/* parsing cookies on req object*/
+import cookieParser from "cookie-parser";
+
+dotenv.config();
+
 const app = express();
+/* to parse incoming request of json */
+app.use(express.json());
+
+app.use(cookieParser());
+
+/* auth api router  */
+app.use("/api/v1/auth", authRoutes);
+/* user api router  */
+app.use("/api/v1/user", userRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
 
 const port = 5000;
 
 dotenv.config();
 
 connectDb();
-
-app.get("/", async () => {
-  const posts = await Post.find();
-
-  const allPost = posts.map((post) => {
-    return post._id;
-  });
-
-  console.log(allPost);
-});
-
-app.get("/post", async () => {
-  try {
-    const userPost = await User.findOne({
-      username: "vipin",
-    }).populate("posts");
-
-    console.log(userPost);
-  } catch (error) {}
-});
 
 app.listen(port, () => {
   console.log("Connected");
