@@ -56,7 +56,6 @@ export const customList = asyncHandler(async (req, res) => {
   try {
     const existUser = await List.findOne({ listName: listName, user: userId });
     if (existUser) {
-      console.log("called exist");
       const { list } = existUser;
       existUser.list = [
         {
@@ -71,7 +70,6 @@ export const customList = asyncHandler(async (req, res) => {
         Message: "Successfully Added",
       });
     } else {
-      console.log("called new");
       const newUser = await List.create({
         listName: listName,
         list: [
@@ -116,6 +114,71 @@ export const createList = asyncHandler(async (req, res) => {
         Message: `${listName} Created`,
       });
     }
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
+/* @desc delete  an item from list */
+/* @route /api/v1/user/list/delete */
+/* @access private */
+
+export const deleteListItem = asyncHandler(async (req, res) => {
+  const { listName, itemId } = req.body;
+  const { userId } = req;
+  try {
+    const existList = await List.findOne({ listName: listName, user: userId });
+    if (existList) {
+      let newList = existList.list.filter((item) => item.id != itemId);
+      existList.list = newList;
+      await existList.save();
+
+      res.send({
+        message: "List item deleted",
+      });
+    } else {
+      throw new Error("invalid post data");
+    }
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
+/* @desc delete list */
+/* @route /api/v1/user/delete/watchlist */
+/* @access private */
+
+export const deleteList = asyncHandler(async (req, res) => {
+  const { listName } = req.body;
+  const { userId } = req;
+  try {
+    const existList = await List.deleteOne({
+      listName: listName,
+      user: userId,
+    });
+    console.log(existList);
+    if (existList.deletedCount !== 0) {
+      res.send({
+        message: "deleted",
+      });
+    } else {
+      throw new Error("invalid post data");
+    }
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
+/* @desc get list */
+/* @route /api/v1/user/list */
+/* @access private */
+
+export const getList = asyncHandler(async (req, res) => {
+  const { userId } = req;
+  try {
+    const allList = await List.find({ user: userId });
+    console.log(allList);
+    res.json(allList);
   } catch (err) {
     throw new Error(err.message);
   }
