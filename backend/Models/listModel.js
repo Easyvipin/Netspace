@@ -8,7 +8,10 @@ const listSchema = new mongoose.Schema(
     },
     list: [
       {
-        listType: String,
+        listType: {
+          type: String,
+          required: true,
+        },
         mediaId: {
           type: Number,
           required: true,
